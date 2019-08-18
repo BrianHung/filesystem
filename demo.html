@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>FileSystem</title>
+        <meta charset="utf-8">
+        <meta name="description" content="">
+
+        <!-- Add meta tags. -->
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <style>
+        @import url('https://rsms.me/inter/inter.css');
+        html
+        {
+            font-family: 'Inter', sans-serif;
+            font-display: auto;
+            text-rendering: optimizeLegibility;
+            background: white;
+        }
+        @supports (font-variation-settings: normal)
+        {
+            html
+            {
+                font-family: 'Inter', sans-serif;
+            }
+        }
+        .tree-wrap
+        {
+            width: 80vw;
+            height: 80vh;
+            overflow: auto;
+            margin: 2em auto;
+            padding: 2em;
+            border-radius: 32px;
+            border: 12px solid #000000;
+            border: 12px solid #E8E8E8;
+            box-shadow: 0 5px 10px rgba(154,160,185,.05), 0 15px 40px rgba(166,173,201,.2);
+            background: white;
+            user-select: none;
+        }
+        .tree-root
+        {
+            padding: 0;
+            display: block !important;
+        }
+        .tree-list
+        {
+            display: none;
+            width: 100%;
+            list-style-type: none;
+            padding: 0;
+        }
+        .tree-list.expanded
+        {
+            display: block;
+        }
+        .tree-item
+        {
+            width: 100%;
+            box-sizing: border-box;
+            font-weight: 500;
+            font-size: 18px;
+        }
+        .tree-item:hover
+        {
+            border-radius: 5px;
+            background-color: rgba(000, 122, 255, 0.10);
+        }
+        .tree-item > .tree-list
+        {
+            position: relative;
+            padding-left: 2em;
+            box-sizing: border-box;
+        }
+        .tree-item > span
+        {
+            padding-left: 0.5em;
+        }
+        .tree-item:hover > span
+        {
+            color: rgba(000, 122, 255, 1.00);
+        }
+        .tree-item > img
+        {
+            vertical-align: middle;
+            width: 2.5em;
+            filter: invert(66%) sepia(7%) saturate(191%) hue-rotate(201deg) brightness(85%) contrast(82%);
+        }
+        .tree-item:hover > img
+        {
+            filter: invert(60%) sepia(90%) saturate(6840%) hue-rotate(201deg) brightness(103%) contrast(105%);
+        }
+        .tree-file
+        {
+            content: url("file.svg");
+        }
+        .tree-fold
+        {
+            content: url("fold.svg");
+        }
+        .tree-search
+        {
+            outline: none;
+            width: 100%;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            padding: 0.5em 0.5em 0.5em 2em;
+            box-sizing: border-box;
+            color: #8e8e93;
+            background-color: #F7F7F7;
+            background-image: url(search.svg);
+            background-repeat: no-repeat;
+            background-size: 1.2em;
+            background-position: 0.5em 50%;
+        }
+        </style>
+    </head>
+
+    <body>
+        <div class="tree-wrap">
+            <h1>Browse</h1>
+            <input class="tree-search" placeholder="Search" type="search"></input>
+            <ul class="tree-root tree-list" data-id="">
+            </ul>
+        </div>
+        <script src="filesystem.js"></script>
+        <script>
+        document.body.addEventListener("click", function(event) {
+            let target = event.target.closest(".tree-item")
+            console.log(target)
+            if (target.classList.contains("tree-item")) {
+                let treeList = target.querySelector(".tree-list")
+                if (treeList) {
+                    drawTreeList(treeList.getAttribute('data-id'))
+                    treeList.classList.toggle("expanded")
+                }
+            }
+        })
+        </script>
+    </body>
+</html>

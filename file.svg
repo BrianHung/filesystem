@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="93" height="84" viewBox="0 0 93 84">
+  <defs>
+    <clipPath id="clip-_3x_75">
+      <rect width="93" height="84"/>
+    </clipPath>
+  </defs>
+  <g id="_3x_75" data-name="@3x – 75" clip-path="url(#clip-_3x_75)">
+    <g id="Group_364" data-name="Group 364" transform="translate(-6397.938 -730.155)">
+      <g id="Group_361" data-name="Group 361">
+        <rect id="Rectangle_44" data-name="Rectangle 44" width="36" height="36" rx="1" transform="translate(6426.571 760.889)"/>
+      </g>
+      <g id="Group_362" data-name="Group 362">
+        <rect id="Rectangle_45" data-name="Rectangle 45" width="19" height="4.098" rx="2" transform="translate(6426.571 748.889)"/>
+      </g>
+      <g id="Group_363" data-name="Group 363">
+        <path id="Path_160" data-name="Path 160" d="M6463.078,744.054a4.367,4.367,0,0,1,4.362,4.362v48.946a4.367,4.367,0,0,1-4.362,4.363h-37.014a4.368,4.368,0,0,1-4.363-4.363V748.416a4.367,4.367,0,0,1,4.363-4.362h37.014m.106-4.165h-37.226a8.412,8.412,0,0,0-8.387,8.387V797.5a8.412,8.412,0,0,0,8.387,8.387h37.226a8.411,8.411,0,0,0,8.387-8.387V748.276a8.411,8.411,0,0,0-8.387-8.387Z"/>
+      </g>
+    </g>
+  </g>
+</svg>
