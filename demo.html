@@ -38,10 +38,17 @@
             background: white;
             user-select: none;
         }
+        @media only screen and (max-width: 768px) {
+            .tree-wrap
+            {
+                border: none;
+                box-shadow: none;
+            }
+        }
         .tree-root
         {
             padding: 0;
-            display: block !important;
+            /* display: block !important;*/
         }
         .tree-list
         {
@@ -120,23 +127,47 @@
     <body>
         <div class="tree-wrap">
             <h1>Browse</h1>
-            <input class="tree-search" placeholder="Search" type="search"></input>
-            <ul class="tree-root tree-list" data-id="">
-            </ul>
+            <div>
+                <input class="tree-search" placeholder="Search" type="search"></input>
+                <ul class="tree-find tree-list">
+                </ul>
+            </div>
+            <div>
+                <ul class="tree-root tree-list expanded" data-id="">
+                </ul>
+            </div>
         </div>
+        <script src="fuse.js"></script>
         <script src="filesystem.js"></script>
         <script>
-        document.body.addEventListener("click", function(event) {
-            let target = event.target.closest(".tree-item")
-            console.log(target)
-            if (target.classList.contains("tree-item")) {
-                let treeList = target.querySelector(".tree-list")
-                if (treeList) {
-                    drawTreeList(treeList.getAttribute('data-id'))
-                    treeList.classList.toggle("expanded")
+            document.body.addEventListener("click", function(event) {
+                let target = event.target.closest(".tree-item")
+                console.log(target)
+                if (target && target.classList.contains("tree-item")) {
+                    let treeList = target.querySelector(".tree-list")
+                    if (treeList) {
+                        drawTreeList(treeList.getAttribute('data-id'))
+                        treeList.classList.toggle("expanded")
+                    }
                 }
-            }
-        })
+            })
+            const inputSearch = document.querySelector(".tree-search")
+            inputSearch.addEventListener("keyup", function(event) {
+                let query = inputSearch.value
+                let treeList = document.querySelector(`.tree-find`)
+                let treeRoot = document.querySelector(`.tree-root`)
+                search(query)
+                treeList.classList.toggle("expanded", query)
+                treeRoot.classList.toggle("expanded",!query)
+            })
+            inputSearch.addEventListener("search",function(event) {
+                let query = inputSearch.value
+                let treeList = document.querySelector(`.tree-find`)
+                let treeRoot = document.querySelector(`.tree-root`)
+                search(query)
+                treeList.classList.toggle("expanded", query)
+                treeRoot.classList.toggle("expanded",!query)
+            })
         </script>
     </body>
 </html>

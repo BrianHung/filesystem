@@ -131,23 +131,67 @@ function obtainIndex(store, index)  {
     return st.index(index)
 }
 
+function searchStore(store, query) {
+    // Define the database transaction.
+    let tx = database.transaction(store, 'readonly')
+    // Get store from transaction.
+    let st = tx.objectStore(store)
+    let cr = st.openCursor()
 
+    let results = []
+    cr.onsuccess = function(event) {
+        let cursor = event.target.result
+        if (cursor) {
+            if (cursor.value.name.includes(query)) {
+                results.push(cursor.value)
+            }
+            cursor.continue()
+        }
+    }
+    return results
+}
+
+/* =============================================================================
+ * Utilities for rendering FileTree.
+ * =============================================================================
+ */
+
+function drawFileTree(treeList, result)  {
+    treeList.innerHTML = ""
+    for(let item of result) {
+        let temp = document.createElement("div")
+        if (item.isFile) {
+            temp.innerHTML = `<li class="tree-item" data-id="${item.id}"><img class="tree-file"><span>${item.name}</span></li>`
+        } else {
+            temp.innerHTML = `<li class="tree-item" data-id="${item.id}"><img class="tree-fold"><span>${item.name}</span><ul class="tree-list" data-id="${item.id}"></ul></li>`
+        }
+        treeList.appendChild(temp.firstChild)
+    }
+}
 
 function drawTreeList(treeId) {
     let treeList = document.querySelector(`.tree-list[data-id="${treeId}"]`)
-    treeList.innerHTML = ""
-
     let treeItems= obtainIndex("local", "parents").getAll(`${treeId}`)
     treeItems.onsuccess = function() {
-        for(let item of treeItems.result) {
-            let temp = document.createElement("div")
-            if (item.isFile) {
-                temp.innerHTML = `<li class="tree-item" data-id="${item.id}"><img class="tree-file"><span>${item.name}</span></li>`
-            } else {
-                temp.innerHTML = `<li class="tree-item" data-id="${item.id}"><img class="tree-fold"><span>${item.name}</span><ul class="tree-list" data-id="${item.id}"></ul></li>`
-            }
-            treeList.appendChild(temp.firstChild)
-        }
+        drawFileTree(treeList, treeItems.result)
+    }
+}
+
+async function search(query) {
+    let treeList = document.querySelector(`.tree-find`)
+    let store = await obtainAllFiles("local")
+    store.onsuccess = function() {
+        console.log(store.result)
+        let fuse = new Fuse(store.result, {
+            caseSensitive: false,
+            shouldSort: true,
+            threshold: 0.1,
+            keys: ["name", "text"]
+        })
+
+        let items= fuse.search(query)
+        console.log(items)
+        drawFileTree(treeList, items)
     }
 }
 
@@ -159,19 +203,30 @@ function drawTreeList(treeId) {
 function handleDrop(event) {
     event.stopPropagation()
     event.preventDefault()
-    var items  = event.dataTransfer.items;
+    let items  = event.dataTransfer.items;
+    let uploads= []
     for (var i = 0, item; item = items[i]; i++) {
         item   = item.webkitGetAsEntry()
-        uploadLocal(item)
+        uploads.push(uploadLocal(item))
     }
-    drawTreeList("")
+    // Render tree list when all first-level files have finished uploading.
+    Promise.all(uploads).then(function() {
+        console.log("Tree refreshed.")
+        drawTreeList("")
+    })
 }
 
 
 async function uploadLocal(item, parents="") {
+    console.log(item)
     if (item.isFile) {
-        item.file(function(file) {
+        item.file(async function(file) {
+        console.log(file)
         let meta = createMeta(item.name, undefined, item.isFile, file, parents)
+        if (file.type.includes("text")) {
+            let text = await file.text()
+            Object.assign(meta, {text: text, lastModified: file.lastModified})
+        }
         updateFile("local", meta.id, meta)
         })
     } else {
