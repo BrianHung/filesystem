@@ -65,13 +65,19 @@
         {
             width: 100%;
             box-sizing: border-box;
+            border-radius: 5px;
             font-weight: 500;
             font-size: 18px;
+            list-style: none;
         }
         .tree-item:hover
         {
-            border-radius: 5px;
-            background-color: rgba(000, 122, 255, 0.10);
+            background-color: rgba(000, 122, 255, 0.10) !important;
+        }
+
+        .tree-item.droparea
+        {
+            background-color: rgba(247, 247, 247, 1.00);
         }
         .tree-item > .tree-list
         {
@@ -81,7 +87,7 @@
         }
         .tree-item > span
         {
-            padding-left: 0.5em;
+            padding: 0 0.5em;
         }
         .tree-item:hover > span
         {
@@ -115,6 +121,7 @@
             padding: 0.5em 0.5em 0.5em 2em;
             box-sizing: border-box;
             color: #8e8e93;
+            caret-color: #007AFF;
             background-color: #F7F7F7;
             background-image: url(search.svg);
             background-repeat: no-repeat;
