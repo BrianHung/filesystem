@@ -195,6 +195,22 @@ async function search(query) {
     }
 }
 
+/**
+ * Updates the parents for a given fileId.
+ * @param fileId      fileId of folder to update
+ * @param oldParentId fileId of parent to remove
+ * @param newParentId fileId of parent to append
+ */
+async function updateParent(fileId, oldParentId, newParentId) {
+    let file = obtainFile("local", fileId)
+    file.onsuccess = function() {
+        file = file.result
+        Object.assign(file, {parents: file.parents.map(x => x == oldParentId ? newParentId : x)})
+        drawTreeList(oldParentId)
+        drawTreeList(newParentId)
+    }
+}
+
 /* =============================================================================
  * Drag-and-Drop
  * =============================================================================
@@ -209,24 +225,27 @@ function handleDrop(event) {
     }
     console.log(dragTarget)
 
-    let items  = event.dataTransfer.items;
-    console.log(event.target)
-    let uploads= []
-    for (var i = 0, item; item = items[i]; i++) {
-        item   = item.webkitGetAsEntry()
-        uploads.push(uploadLocal(item))
-    }
-    // Render tree list when all first-level files have finished uploading.
-    Promise.all(uploads).then(function() {
-        console.log("Tree refreshed.")
-        drawTreeList("")
-    })
+    if (dragTarget) {
 
-    dragTarget = ""
+        dragTarget = ""
+    } else {
+        let items  = event.dataTransfer.items;
+        console.log(event.target)
+        let uploads= []
+        for (var i = 0, item; item = items[i]; i++) {
+            item   = item.webkitGetAsEntry()
+            uploads.push(uploadLocal(item))
+        }
+        // Render tree list when all first-level files have finished uploading.
+        Promise.all(uploads).then(function() {
+            console.log("Tree refreshed.")
+            drawTreeList("")
+        })
+    }
 }
 
 
-async function uploadLocal(item, parents="") {
+async function uploadLocal(item, parents=[""]) {
     console.log(item)
     if (item.isFile) {
         item.file(async function(file) {
@@ -259,22 +278,27 @@ function handleDragOver(event) {
     event.stopPropagation();
     event.preventDefault();
 
-    console.log("dragover")
+    // console.log("dragover")
     event.dataTransfer.dropEffect = 'copy';
 }
 
 function handleDragEnter(event) {
+    event.stopPropagation();
+    event.preventDefault();
     let target = event.target.closest(".tree-item")
-    if (target && target.querySelector(".tree-list")) {
-        // console.log("dragenter")
+    console.log(event.target, target, target.querySelector(".tree-list"))
+    if (target && target != dragTarget && target.querySelector(".tree-list")) {
+        console.log("dragenter")
         target.classList.toggle("droparea", true)
     }
 }
 
 function handleDragLeave(event) {
+    event.stopPropagation();
+    event.preventDefault();
     let target = event.target.closest(".tree-item")
-    if (target && target.querySelector(".tree-list")) {
-        // console.log("dragleave")
+    if (target && target != dragTarget && target.querySelector(".tree-list")) {
+        console.log("dragleave")
         target.classList.toggle("droparea",!true)
     }
 }
