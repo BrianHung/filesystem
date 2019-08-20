@@ -30,6 +30,8 @@
         }
         .tree-wrap
         {
+            display: flex;
+            flex-direction: column;
             width: 80vw;
             max-width: 768px;
             height: 80vh;
@@ -45,7 +47,7 @@
         }
         .tree-wrap > *
         {
-            animation: slide-up 0.4s ease;
+            animation: slide-up 0.8s ease;
         }
         @media only screen and (max-width: 768px) {
             .tree-wrap
@@ -54,10 +56,18 @@
                 box-shadow: none;
             }
         }
+        .tree-area
+        {
+            flex-grow: 1;
+            border-radius: 5px;
+        }
+        .tree-area.droparea
+        {
+            background-color: rgba(000, 122, 255, 0.10);
+        }
         .tree-root
         {
             padding: 0;
-            /* display: block !important;*/
         }
         .tree-list
         {
@@ -161,14 +171,12 @@
     <body>
         <div class="tree-wrap">
             <h1>Browse</h1>
-            <div>
+            <div class="">
                 <input class="tree-search" placeholder="Search" type="search"></input>
-                <ul class="tree-find tree-list">
-                </ul>
+                <ul class="tree-find tree-list"></ul>
             </div>
-            <div>
-                <ul class="tree-root tree-list expanded" data-id="">
-                </ul>
+            <div class="tree-area">
+                <ul class="tree-root tree-list expanded" data-id=""></ul>
             </div>
         </div>
         <script src="fuse.js"></script>

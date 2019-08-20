@@ -205,9 +205,9 @@ async function updateParent(fileId, oldParentId, newParentId) {
     let file = obtainFile("local", fileId)
     file.onsuccess = function() {
         file = file.result
+        console.log(file, file.parents, oldParentId, newParentId)
         Object.assign(file, {parents: file.parents.map(x => x == oldParentId ? newParentId : x)})
-        drawTreeList(oldParentId)
-        drawTreeList(newParentId)
+        updateFile("local", fileId, file)
     }
 }
 
@@ -216,33 +216,7 @@ async function updateParent(fileId, oldParentId, newParentId) {
  * =============================================================================
  */
 
-function handleDrop(event) {
-    event.stopPropagation()
-    event.preventDefault()
 
-    if (dragImage) {
-        document.body.removeChild(dragImage)
-    }
-    console.log(dragTarget)
-
-    if (dragTarget) {
-
-        dragTarget = ""
-    } else {
-        let items  = event.dataTransfer.items;
-        console.log(event.target)
-        let uploads= []
-        for (var i = 0, item; item = items[i]; i++) {
-            item   = item.webkitGetAsEntry()
-            uploads.push(uploadLocal(item))
-        }
-        // Render tree list when all first-level files have finished uploading.
-        Promise.all(uploads).then(function() {
-            console.log("Tree refreshed.")
-            drawTreeList("")
-        })
-    }
-}
 
 
 async function uploadLocal(item, parents=[""]) {
@@ -275,35 +249,41 @@ async function uploadLocal(item, parents=[""]) {
 
 
 function handleDragOver(event) {
-    event.stopPropagation();
-    event.preventDefault();
-
-    // console.log("dragover")
+    event.stopPropagation()
+    event.preventDefault()
     event.dataTransfer.dropEffect = 'copy';
 }
 
 function handleDragEnter(event) {
-    event.stopPropagation();
-    event.preventDefault();
-    let target = event.target.closest(".tree-item")
-    console.log(event.target, target, target.querySelector(".tree-list"))
-    if (target && target != dragTarget && target.querySelector(".tree-list")) {
+    event.stopPropagation()
+    event.preventDefault()
+    let dropTarget = event.target.closest(".tree-item") || event.target
+    let hasTreeList= dropTarget.querySelector(":scope > .tree-list")
+    // Check that dragTarget does not contain the dropTarget, and that dropTarget has tree-list.
+    if ((!dragTarget && hasTreeList) || (!dragTarget.contains(dropTarget) && hasTreeList)) {
         console.log("dragenter")
-        target.classList.toggle("droparea", true)
+        dropTarget.classList.toggle("droparea", true)
     }
 }
 
 function handleDragLeave(event) {
     event.stopPropagation();
     event.preventDefault();
-    let target = event.target.closest(".tree-item")
-    if (target && target != dragTarget && target.querySelector(".tree-list")) {
-        console.log("dragleave")
-        target.classList.toggle("droparea",!true)
+    let dropTarget = event.target.closest(".tree-item") || event.target
+    let hasTreeList= dropTarget.querySelector(":scope > .tree-list")
+    // Check that dragTarget does not contain the dropTarget, and that dropTarget has tree-list.
+    if ((!dragTarget && hasTreeList) || (!dragTarget.contains(dropTarget) && hasTreeList)) {
+        console.log("dragenter")
+        dropTarget.classList.toggle("droparea",!true)
     }
 }
 
-var dragImage, dragTarget
+var dragTarget
+var drawImage
+/**
+ * Tracks dragtargets and creates image preview.
+ * @param event
+ */
 function handleDragStart(event) {
     console.log("dragstart")
     dragTarget= event.target
@@ -317,8 +297,46 @@ function handleDragStart(event) {
         width: "fit-content", position: "absolute", top: "-200px",
     })
     document.body.appendChild(dragImage)
-    console.log(event.dataTransfer)
     event.dataTransfer.setDragImage(dragImage, 0, 0);
+}
+
+
+function handleDrop(event) {
+    event.stopPropagation()
+    event.preventDefault()
+
+    let dropTarget = event.target
+    if (dropTarget.classList.contains("droparea")) {
+        console.log(dropTarget)
+        let treeList = dropTarget.querySelector(".tree-list")
+        if (dragTarget && !dragTarget.contains(dropTarget)) {
+            oldParentId = dragTarget.parentElement.dataset.id
+            newParentId = dropTarget.dataset.id || treeList.dataset.id
+            if (oldParentId != newParentId) {
+                updateParent(dragTarget.dataset.id, oldParentId, newParentId)
+                dragTarget.parentElement.removeChild(dragTarget)
+                treeList.appendChild(dragTarget)
+            }
+            document.body.removeChild(dragImage)
+            dragTarget = ""
+        } else {
+            let items  = event.dataTransfer.items;
+            console.log(event.target)
+            let uploads= []
+            for (var i = 0, item; item = items[i]; i++) {
+                item   = item.webkitGetAsEntry()
+                uploads.push(uploadLocal(item))
+            }
+            // Render tree list when all first-level files have finished uploading.
+            Promise.all(uploads).then(function() {
+                console.log("Tree refreshed.")
+                drawTreeList("")
+            })
+        }
+        dropTarget.classList.toggle("droparea",!true)
+    } else {
+        console.log(`${dropTarget.classList} is not a valid droparea.`)
+    }
 }
 
 // Setup the dnd listeners.
