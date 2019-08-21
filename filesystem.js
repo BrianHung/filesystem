@@ -260,7 +260,8 @@ function handleDragEnter(event) {
     let dropTarget = event.target.closest(".tree-item") || event.target
     let hasTreeList= dropTarget.querySelector(":scope > .tree-list")
     // Check that dragTarget does not contain the dropTarget, and that dropTarget has tree-list.
-    if ((!dragTarget && hasTreeList) || (!dragTarget.contains(dropTarget) && hasTreeList)) {
+    if ((!dragTarget && hasTreeList) ||
+        ( dragTarget && !dragTarget.contains(dropTarget) && hasTreeList)) {
         console.log("dragenter")
         dropTarget.classList.toggle("droparea", true)
     }
@@ -272,7 +273,8 @@ function handleDragLeave(event) {
     let dropTarget = event.target.closest(".tree-item") || event.target
     let hasTreeList= dropTarget.querySelector(":scope > .tree-list")
     // Check that dragTarget does not contain the dropTarget, and that dropTarget has tree-list.
-    if ((!dragTarget && hasTreeList) || (!dragTarget.contains(dropTarget) && hasTreeList)) {
+    if ((!dragTarget && hasTreeList) ||
+        ( dragTarget && !dragTarget.contains(dropTarget) && hasTreeList)) {
         console.log("dragenter")
         dropTarget.classList.toggle("droparea",!true)
     }
@@ -285,6 +287,8 @@ var drawImage
  * @param event
  */
 function handleDragStart(event) {
+    event.stopPropagation();
+    event.preventDefault();
     console.log("dragstart")
     dragTarget= event.target
     dragImage = event.target.cloneNode(true)
@@ -321,16 +325,14 @@ function handleDrop(event) {
             dragTarget = ""
         } else {
             let items  = event.dataTransfer.items;
-            console.log(event.target)
-            let uploads= []
+            let upload = []
             for (var i = 0, item; item = items[i]; i++) {
                 item   = item.webkitGetAsEntry()
-                uploads.push(uploadLocal(item))
+                upload.push(uploadLocal(item, [treeList.dataset.id]))
             }
             // Render tree list when all first-level files have finished uploading.
-            Promise.all(uploads).then(function() {
-                console.log("Tree refreshed.")
-                drawTreeList("")
+            Promise.all(upload).then(function() {
+                drawTreeList(treeList.dataset.id)
             })
         }
         dropTarget.classList.toggle("droparea",!true)
