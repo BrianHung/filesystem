@@ -287,8 +287,7 @@ var drawImage
  * @param event
  */
 function handleDragStart(event) {
-    event.stopPropagation();
-    event.preventDefault();
+
     console.log("dragstart")
     dragTarget= event.target
     dragImage = event.target.cloneNode(true)
